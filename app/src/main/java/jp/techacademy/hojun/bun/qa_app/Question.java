@@ -10,6 +10,7 @@ public class Question implements Serializable {
     private String mUid;
     private String mQuestionUid;
     private int mGenre;
+    private String mFavorite;
     private byte[] mBitmapArray;
     private ArrayList<Answer> mAnswerArrayList;
 
@@ -44,13 +45,14 @@ public class Question implements Serializable {
         return mAnswerArrayList;
     }
 
-    public Question(String title, String body, String name, String uid, String questionUid, int genre, byte[] bytes, ArrayList<Answer> answers) {
+    public Question(String title, String body, String name, String uid, String questionUid, int genre, String favorite, byte[] bytes, ArrayList<Answer> answers) {
         mTitle = title;
         mBody = body;
         mName = name;
         mUid = uid;
         mQuestionUid = questionUid;
         mGenre = genre;
+        mFavorite = favorite;
         mBitmapArray = bytes.clone();
         mAnswerArrayList = answers;
     }

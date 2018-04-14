@@ -176,6 +176,7 @@ public class LoginActivity extends AppCompatActivity {
                     mIsCreateAccount = false;
 
                     login(email, password);
+
                 } else {
                     // エラーを表示する
                     Snackbar.make(v, "正しく入力してください", Snackbar.LENGTH_LONG).show();

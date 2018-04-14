@@ -16,6 +16,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class QuestionDetailActivity extends AppCompatActivity {
 
@@ -24,6 +25,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
+    private DatabaseReference mFavoriteRef;
+    private boolean mFavoriteFlag = false;
+
+
+
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -46,6 +52,40 @@ public class QuestionDetailActivity extends AppCompatActivity {
             Answer answer = new Answer(body, name, uid, answerUid);
             mQuestion.getAnswers().add(answer);
             mAdapter.notifyDataSetChanged();
+        }
+
+
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    private ChildEventListener mFavoriteListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            //todo お気に入りボタンの切り替え処理
+
+            FloatingActionButton favorite =  findViewById(R.id.favoriteButton);
+            mFavoriteFlag = true;
+            favorite.setImageResource(R.drawable.ic_star_white_18dp);
+
         }
 
         @Override
@@ -74,6 +114,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question_detail);
 
+
         // 渡ってきたQuestionのオブジェクトを保持する
         Bundle extras = getIntent().getExtras();
         mQuestion = (Question) extras.get("question");
@@ -81,12 +122,49 @@ public class QuestionDetailActivity extends AppCompatActivity {
         setTitle(mQuestion.getTitle());
 
         // ListViewの準備
-        mListView = (ListView) findViewById(R.id.listView);
+        mListView = findViewById(R.id.listView);
         mAdapter = new QuestionDetailListAdapter(this, mQuestion);
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+    final FloatingActionButton favorite =  findViewById(R.id.favoriteButton);
+        favorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mFavoriteFlag) {
+                    //todo お気に入り削除　ボタン画像変更
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    mFavoriteRef.child(Const.FavoritePATH).child(user.getUid()).child(mQuestion.getQuestionUid());
+                    // UID
+                    mFavoriteRef.removeValue();
+                    mFavoriteFlag = false;
+                    favorite.setImageResource(R.drawable.ic_star_outline_white_18dp);
+
+
+                }else {
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    mFavoriteRef.child(Const.FavoritePATH).child(user.getUid()).child(mQuestion.getQuestionUid());
+                    Map<String, Integer> data = new HashMap<String, Integer>();
+
+                    // UID
+                    data.put("genre", mQuestion.getGenre());
+                    mFavoriteRef.setValue(data);
+                    //todo flagをかえる　ボタン画像変更
+                    mFavoriteFlag = true;
+                    favorite.setImageResource(R.drawable.ic_star_white_18dp);
+                }
+            }
+        });
+
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+        if(user!=null){
+        mFavoriteRef = dataBaseReference.child(Const.FavoritePATH).child(user.getUid()).child(mQuestion.getQuestionUid());
+        mFavoriteRef.addChildEventListener(mFavoriteListener);}
+
+
+    FloatingActionButton fab =  findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,13 +177,32 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     startActivity(intent);
                 } else {
                     // Questionを渡して回答作成画面を起動する
-                    // TODO:
+                    // --- ここから ---
+                    Intent intent = new Intent(getApplicationContext(), AnswerSendActivity.class);
+                    intent.putExtra("question", mQuestion);
+                    startActivity(intent);
+                    // --- ここまで ---
                 }
             }
         });
 
-        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+        //DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) {
+            // ログインしていなければログイン画面に遷移させる
+            findViewById(R.id.favoriteButton).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.favoriteButton).setVisibility(View.VISIBLE);
+        }
+
     }
 }
