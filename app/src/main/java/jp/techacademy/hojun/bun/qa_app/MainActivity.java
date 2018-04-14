@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_compter) {
                     mToolbar.setTitle("コンピューター");
                     mGenre = 4;
-                } else if (id == R.id.nav_fvorite) {
+                } else if (id == R.id.nav_favorite) {
                     mToolbar.setTitle("お気に入り");
 
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
