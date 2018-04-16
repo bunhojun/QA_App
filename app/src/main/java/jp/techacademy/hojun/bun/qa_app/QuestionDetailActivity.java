@@ -1,12 +1,9 @@
 package jp.techacademy.hojun.bun.qa_app;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.view.View;
 import android.widget.ListView;
 
@@ -18,8 +15,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -137,7 +132,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(mFavoriteFlag) {
-                    //todo お気に入り削除　ボタン画像変更
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     mFavoriteRef.child(Const.FavoritePATH).child(user.getUid()).child(mQuestion.getQuestionUid());
                     // UID
@@ -150,30 +144,12 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     mFavoriteRef.child(Const.FavoritePATH).child(user.getUid()).child(mQuestion.getQuestionUid());
 
-                    Map<String, String> data = new HashMap<>();
-                    data.put("body", mQuestion.getBody());
-                    data.put("title", mQuestion.getTitle());
+                    Map<String, Integer> data = new HashMap<>();
 
-                    byte[] imageByte = mQuestion.getImageBytes();
-                    //String image = new String(imageByte);
-                    //if(image != null) {
-                    //data.put("image", image);
-                   // }
-                    String image = Base64.encodeToString(imageByte, Base64.DEFAULT);
-
-
-                    if(image != null) {
-                        data.put("image", image);
-                    }
-
-                    String genre = String.valueOf(mQuestion.getGenre());
-
-                    data.put("genre", genre);
-                    data.put("name", mQuestion.getName());
+                    data.put("genre", mQuestion.getGenre());
 
                     mFavoriteRef.setValue(data);
 
-                    //todo flagをかえる　ボタン画像変更
                     mFavoriteFlag = true;
                     favorite.setImageResource(R.drawable.ic_star_white_18dp);
                 }
