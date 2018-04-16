@@ -27,12 +27,14 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static Map<String, String> favoriteMap = new HashMap<String, String>();
+
     private Toolbar mToolbar;
     private int mGenre = 0;
-    private String mFavorite;
 
 
     private DatabaseReference mDatabaseReference;
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, mFavorite, bytes, answerArrayList);
+            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
             mQuestionArrayList.add(question);
             mAdapter.notifyDataSetChanged();
         }
@@ -101,6 +103,33 @@ public class MainActivity extends AppCompatActivity {
                     mAdapter.notifyDataSetChanged();
                 }
             }
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
         }
 
         @Override
@@ -183,23 +212,30 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_favorite) {
                     mToolbar.setTitle("お気に入り");
 
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
+                    startActivity(intent);
 
-                    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                    drawer.closeDrawer(GravityCompat.START);
+                   /* FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                    // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
-                    mQuestionArrayList.clear();
-                    mAdapter.setQuestionArrayList(mQuestionArrayList);
-                    mListView.setAdapter(mAdapter);
-                    if(user != null){
-                    mFavorite = user.getUid();}
-                    if(mFavoriteRef != null) {
-                        mFavoriteRef.removeEventListener(mEventListener);
-                    }
-                    mFavoriteRef = mDatabaseReference.child(Const.FavoritePATH).child(String.valueOf(mFavorite));
-                    mFavoriteRef.addChildEventListener(mEventListener);
-                    return true;
+                    if (user != null) {
+
+                        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                        drawer.closeDrawer(GravityCompat.START);
+
+                        // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+                        mQuestionArrayList.clear();
+                        mAdapter.setQuestionArrayList(mQuestionArrayList);
+                        mListView.setAdapter(mAdapter);
+                        if (user != null) {
+                            mFavorite = user.getUid();
+                        }
+                        if (mFavoriteRef != null) {
+                            mFavoriteRef.removeEventListener(mEventListener);
+                        }
+                        mFavoriteRef = mDatabaseReference.child(Const.FavoritePATH).child(String.valueOf(mFavorite));
+                        mFavoriteRef.addChildEventListener(mEventListener); //カテゴリー
+                        return true;
+                    } */
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -243,8 +279,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -264,4 +300,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }
