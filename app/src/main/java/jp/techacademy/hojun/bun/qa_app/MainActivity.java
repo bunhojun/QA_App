@@ -31,11 +31,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static Map<String, String> favoriteMap = new HashMap<String, String>();
-
     private Toolbar mToolbar;
     private int mGenre = 0;
-
 
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
@@ -43,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
+    private String mFavorite;
 
+    public static Map<String, Long> favoriteMap = new HashMap<String, Long>();
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -121,9 +120,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
+    private ChildEventListener mFavoriteListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            HashMap map = (HashMap) dataSnapshot.getValue();
+
+            Long genre = (Long) map.get("genre");
+            favoriteMap.put(dataSnapshot.getKey(), genre);
 
         }
 
@@ -215,27 +218,6 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
                     startActivity(intent);
 
-                   /* FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                    if (user != null) {
-
-                        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                        drawer.closeDrawer(GravityCompat.START);
-
-                        // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
-                        mQuestionArrayList.clear();
-                        mAdapter.setQuestionArrayList(mQuestionArrayList);
-                        mListView.setAdapter(mAdapter);
-                        if (user != null) {
-                            mFavorite = user.getUid();
-                        }
-                        if (mFavoriteRef != null) {
-                            mFavoriteRef.removeEventListener(mEventListener);
-                        }
-                        mFavoriteRef = mDatabaseReference.child(Const.FavoritePATH).child(String.valueOf(mFavorite));
-                        mFavoriteRef.addChildEventListener(mEventListener); //カテゴリー
-                        return true;
-                    } */
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -246,8 +228,6 @@ public class MainActivity extends AppCompatActivity {
                 mAdapter.setQuestionArrayList(mQuestionArrayList);
                 mListView.setAdapter(mAdapter);
 
-
-
                 // 選択したジャンルにリスナーを登録する
                 if (mGenreRef != null) {
                     mGenreRef.removeEventListener(mEventListener);
@@ -255,8 +235,6 @@ public class MainActivity extends AppCompatActivity {
                 mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
                 mGenreRef.addChildEventListener(mEventListener);
                 return true;
-
-
 
             }
         });
@@ -300,6 +278,18 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+@Override
+    protected void onResume() {
+        super.onResume();
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    if(user != null){
+        mFavorite = user.getUid();
+
+        mFavoriteRef = mDatabaseReference.child(Const.FavoritePATH).child(String.valueOf(mFavorite));
+        mFavoriteRef.addChildEventListener(mFavoriteListener);}
+
+}
+
 
 
 }

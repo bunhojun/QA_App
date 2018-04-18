@@ -1,17 +1,29 @@
 package jp.techacademy.hojun.bun.qa_app;
 
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+
+import static jp.techacademy.hojun.bun.qa_app.MainActivity.favoriteMap;
 
 
 public class FavoriteActivity extends AppCompatActivity {
@@ -25,7 +37,9 @@ public class FavoriteActivity extends AppCompatActivity {
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
-
+    private boolean mFavoriteFlag;
+    private String mFavorite;
+    private Long mFavoriteUid;
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -103,7 +117,32 @@ public class FavoriteActivity extends AppCompatActivity {
         }
     };
 
+    private ChildEventListener mFavoriteListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +150,46 @@ public class FavoriteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_favorite);
 
         setTitle("お気に入り");
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+
+            // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+            mQuestionArrayList.clear();
+            mAdapter.setQuestionArrayList(mQuestionArrayList);
+            mListView.setAdapter(mAdapter);
+           /* if (user != null) {
+                mFavorite = user.getUid();
+            }
+            if (mFavoriteRef != null) {
+                mFavoriteRef.removeEventListener(mEventListener);
+            }
+            mFavoriteRef = mDatabaseReference.child(Const.FavoritePATH).child(String.valueOf(mFavorite));
+            mFavoriteRef.addChildEventListener(mFavoriteListener); */
+        }
+
+        // Firebase
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
+        // ListViewの準備
+        mListView = (ListView) findViewById(R.id.listView);
+        mAdapter = new QuestionsListAdapter(this);
+        mQuestionArrayList = new ArrayList<Question>();
+        mAdapter.notifyDataSetChanged();
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Questionのインスタンスを渡して質問詳細画面を起動する
+                Intent intent = new Intent(getApplicationContext(), QuestionDetailActivity.class);
+                intent.putExtra("question", mQuestionArrayList.get(position));
+                startActivity(intent);
+            }
+        });
+
     }
+
 
 }
 
