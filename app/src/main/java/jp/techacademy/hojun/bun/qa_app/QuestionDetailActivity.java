@@ -80,7 +80,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private ChildEventListener mFavoriteListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            //todo お気に入りボタンの切り替え処理
 
             FloatingActionButton favorite =  findViewById(R.id.favoriteButton);
             mFavoriteFlag = true;

@@ -16,8 +16,9 @@ public class QuestionsListAdapter extends BaseAdapter{
     private LayoutInflater mLayoutInflater = null;
     private ArrayList<Question> mQuestionArrayList;
 
-    public QuestionsListAdapter(Context context) {
+    public QuestionsListAdapter(Context context, ArrayList<Question> mQuestionArrayList) {
         mLayoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.mQuestionArrayList = mQuestionArrayList;
     }
 
     @Override

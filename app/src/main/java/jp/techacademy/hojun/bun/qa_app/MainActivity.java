@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
-    private String mFavorite;
+    private String mUserUid;
 
     public static Map<String, Long> favoriteMap = new HashMap<String, Long>();
 
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             HashMap map = (HashMap) dataSnapshot.getValue();
 
             // 変更があったQuestionを探す
-            for (Question question: mQuestionArrayList) {
+            for (Question question : mQuestionArrayList) {
                 if (dataSnapshot.getKey().equals(question.getQuestionUid())) {
                     // このアプリで変更がある可能性があるのは回答(Answer)のみ
                     question.getAnswers().clear();
@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
                     startActivity(intent);
-
+                    return true;
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
         // ListViewの準備
         mListView = (ListView) findViewById(R.id.listView);
-        mAdapter = new QuestionsListAdapter(this);
+        mAdapter = new QuestionsListAdapter(MainActivity.this, mQuestionArrayList);
         mQuestionArrayList = new ArrayList<Question>();
         mAdapter.notifyDataSetChanged();
 
@@ -278,18 +278,20 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-@Override
+
+    @Override
     protected void onResume() {
         super.onResume();
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    if(user != null){
-        mFavorite = user.getUid();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        favoriteMap.clear();
+        if (user != null) {
+            mUserUid = user.getUid();
 
-        mFavoriteRef = mDatabaseReference.child(Const.FavoritePATH).child(String.valueOf(mFavorite));
-        mFavoriteRef.addChildEventListener(mFavoriteListener);}
+            mFavoriteRef = mDatabaseReference.child(Const.FavoritePATH).child(String.valueOf(mUserUid));
+            mFavoriteRef.addChildEventListener(mFavoriteListener);
+        }
 
-}
-
+    }
 
 
 }
